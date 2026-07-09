@@ -1,0 +1,45 @@
+workflows:
+  android-workflow:
+    name: Arabia Edu - Android APK
+    max_build_duration: 60
+    environment:
+      flutter: stable
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+    scripts:
+      - name: DEBUG - عرض هيكل المستودع الفعلي
+        script: |
+          echo "=== مسار العمل الحالي ==="
+          pwd
+          echo "=== محتوى الجذر ==="
+          ls -la
+          echo "=== بحث عن pubspec.yaml في كل المستودع ==="
+          find . -name "pubspec.yaml" -not -path "*/.git/*"
+          echo "=== بحث عن main.dart في كل المستودع ==="
+          find . -name "main.dart" -not -path "*/.git/*"
+      - name: Get Flutter packages
+        script: |
+          cd arabia_edu
+          flutter pub get
+      - name: Analyze
+        script: |
+          cd arabia_edu
+          flutter analyze || true
+      - name: Build APK (release)
+        script: |
+          cd arabia_edu
+          flutter build apk --release
+    artifacts:
+      - arabia_edu/build/app/outputs/**/*.apk
+      - arabia_edu/build/app/outputs/**/mapping.txt
+    publishing:
+      email:
+        recipients:
+          - chekib318@gmail.com
+        notify:
+          success: true
+          failure: true
